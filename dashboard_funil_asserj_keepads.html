@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keep Ads · Funil de Seguidores · ASSERJ</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root{
+    --green:#00CA9E; --green-dark:#00a382; --green-soft:#E5FAF4;
+    --ink:#0D0D0D; --ink-2:#212121; --gray:#6B6B6B; --gray-soft:#9A9A9A;
+    --line:#ECECEC; --line-2:#F4F4F4;
+    --red:#E24B4A; --red-soft:#FCEBEB; --amber:#EF9F27; --amber-soft:#FBF1DF;
+    --slate:#5B6472; --slate-soft:#EEF1F4; --blue:#3B7DD8; --blue-soft:#E9F1FC;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;background:#fff;color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 28px 64px}
+  header{display:flex;align-items:center;justify-content:space-between;padding:28px 0 24px;border-bottom:3px solid var(--ink);margin-bottom:8px}
+  .logo{font-weight:800;font-size:30px;letter-spacing:-1px;line-height:.9}
+  .logo .k{color:var(--green)} .logo .a{color:var(--ink)}
+  .logo small{display:block;font-size:11px;font-weight:600;color:var(--green);letter-spacing:.5px;margin-top:2px}
+  .head-meta{text-align:right}
+  .head-meta .cli{font-size:18px;font-weight:700}
+  .head-meta .per{font-size:12px;color:var(--gray);font-weight:500;margin-top:2px}
+  .tabs{display:flex;gap:4px;margin:24px 0 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:13px 20px;font-size:14px;font-weight:700;color:var(--gray);cursor:pointer;border:none;background:none;border-bottom:3px solid transparent;margin-bottom:-1px;transition:all .15s;font-family:inherit}
+  .tab:hover{color:var(--ink)}
+  .tab.active{color:var(--ink);border-bottom-color:var(--green)}
+  .panel{display:none} .panel.active{display:block}
+  .report-title{padding:26px 0 26px}
+  .report-title .tag{display:inline-block;background:var(--green-soft);color:var(--green-dark);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:6px 12px;border-radius:6px;margin-bottom:12px}
+  .report-title h1{font-size:30px;font-weight:800;letter-spacing:-.8px;line-height:1.1}
+  .report-title p{color:var(--gray);font-size:14px;margin-top:8px;max-width:730px}
+  .callout{display:grid;grid-template-columns:1fr 1fr;gap:0;border:2px solid var(--ink);border-radius:16px;overflow:hidden;margin:6px 0 30px}
+  .callout > div{padding:22px 24px}
+  .callout .real{background:var(--green);color:var(--ink)}
+  .callout .mix{background:#fff}
+  .callout .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;opacity:.7}
+  .callout .big{font-size:38px;font-weight:800;letter-spacing:-1.5px;margin:6px 0 2px;line-height:1}
+  .callout .desc{font-size:12.5px;font-weight:500}
+  .callout .real .desc{color:rgba(13,13,13,.7)}
+  .callout .mix .big{color:var(--gray)} .callout .mix .desc{color:var(--gray)}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:8px 0 8px}
+  .kpi{border:1px solid var(--line);border-radius:14px;padding:18px;background:#fff}
+  .kpi.dark{background:var(--ink);border-color:var(--ink)}
+  .kpi.green{background:var(--green);border-color:var(--green)}
+  .kpi .lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--gray)}
+  .kpi.dark .lbl{color:rgba(255,255,255,.6)} .kpi.green .lbl{color:rgba(13,13,13,.6)}
+  .kpi .val{font-size:27px;font-weight:800;letter-spacing:-1px;margin-top:8px;line-height:1}
+  .kpi.dark .val{color:#fff} .kpi.green .val{color:var(--ink)}
+  .kpi .sub{font-size:12px;color:var(--gray-soft);margin-top:6px;font-weight:500}
+  .kpi.dark .sub{color:rgba(255,255,255,.45)} .kpi.green .sub{color:rgba(13,13,13,.55)}
+  .section{margin-top:40px}
+  .section-head{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .section-head .bar{width:4px;height:20px;background:var(--green);border-radius:2px}
+  .section-head h2{font-size:18px;font-weight:700;letter-spacing:-.3px}
+  .section-head .hint{font-size:12px;color:var(--gray);font-weight:500;margin-left:auto}
+  .card{border:1px solid var(--line);border-radius:16px;padding:22px;background:#fff}
+  .chart-box{position:relative;height:340px;width:100%}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:14px;font-size:12px;color:var(--gray);font-weight:500}
+  .legend span{display:flex;align-items:center;gap:6px}
+  .dot{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .lin{width:14px;height:3px;border-radius:2px;display:inline-block}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  thead th{text-align:right;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--gray);padding:0 10px 12px;border-bottom:2px solid var(--ink)}
+  thead th:first-child{text-align:left}
+  tbody td{padding:11px 10px;text-align:right;border-bottom:1px solid var(--line-2);font-weight:500}
+  tbody td:first-child{text-align:left;font-weight:700}
+  tbody tr:hover{background:#FAFCFB}
+  tr.best td{background:var(--green-soft)}
+  tr.best td:first-child::after{content:" ●";color:var(--green)}
+  tr.worst td{background:var(--red-soft)}
+  tr.worst td:first-child::after{content:" ●";color:var(--red)}
+  .seg-cell{color:var(--green-dark);font-weight:800}
+  tfoot td{padding:14px 10px;text-align:right;font-weight:800;border-top:2px solid var(--ink);background:var(--ink);color:#fff}
+  tfoot td:first-child{text-align:left}
+  .cps-good{color:var(--green-dark);font-weight:800}
+  .cps-bad{color:var(--red);font-weight:800}
+  .cps-mid{color:var(--amber);font-weight:700}
+  .obj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .obj-card{border:1px solid var(--line);border-radius:14px;padding:18px}
+  .obj-card .top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .obj-card .pill{width:10px;height:10px;border-radius:50%}
+  .obj-card .name{font-size:13px;font-weight:700}
+  .obj-card .role{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;padding:2px 7px;border-radius:5px;margin-left:auto}
+  .role.aq{background:var(--green-soft);color:var(--green-dark)}
+  .role.no{background:var(--slate-soft);color:var(--slate)}
+  .role.ev{background:var(--blue-soft);color:var(--blue)}
+  .obj-card .gasto{font-size:22px;font-weight:800;letter-spacing:-.5px}
+  .obj-card .meta{font-size:12px;color:var(--gray);margin-top:4px;font-weight:500}
+  .obj-card .cps{font-size:12px;font-weight:700;margin-top:6px}
+  .insight{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  .ibox{border-radius:14px;padding:18px 20px}
+  .ibox.win{background:var(--green-soft);border:1px solid #BFEFE2}
+  .ibox.loss{background:var(--red-soft);border:1px solid #F5C9C9}
+  .ibox.neutral{background:var(--slate-soft);border:1px solid #DBE1E7}
+  .ibox h3{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+  .ibox.win h3{color:var(--green-dark)} .ibox.loss h3{color:#A32D2D} .ibox.neutral h3{color:var(--slate)}
+  .ibox p{font-size:13px;color:var(--ink-2);line-height:1.6} .ibox b{font-weight:800}
+  .funnel{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+  .fstep{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:center}
+  .fstep .flabel{text-align:right}
+  .fstep .flabel .fn{font-size:13px;font-weight:700}
+  .fstep .flabel .fv{font-size:12px;color:var(--gray);font-weight:600;margin-top:2px}
+  .fbar-track{position:relative;height:46px;display:flex;align-items:center}
+  .fbar{height:100%;border-radius:10px;display:flex;align-items:center;padding:0 16px;color:#fff;font-weight:800;font-size:14px;min-width:90px}
+  .fconv{position:absolute;right:-2px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;color:var(--gray);background:#fff;padding:2px 8px;border:1px solid var(--line);border-radius:20px;white-space:nowrap}
+  .stage-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px}
+  .stage{border:1px solid var(--line);border-radius:14px;padding:18px}
+  .stage .st{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--gray)}
+  .stage .sv{font-size:24px;font-weight:800;letter-spacing:-.8px;margin:8px 0 4px}
+  .stage .sd{font-size:12px;color:var(--gray);font-weight:500;line-height:1.5}
+  .stage.hl{border-color:var(--green);border-width:2px}
+  .stage.hl .sv{color:var(--green-dark)}
+  .cf-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .cf-card{border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .cf-head{display:flex;align-items:flex-start;gap:8px;margin-bottom:12px}
+  .cf-name{font-size:12.5px;font-weight:700;line-height:1.3;flex:1}
+  .cf-pill{font-size:10px;font-weight:700;color:#fff;padding:3px 8px;border-radius:5px;white-space:nowrap;text-transform:uppercase;letter-spacing:.3px}
+  .cf-funnel{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+  .cf-row{display:grid;grid-template-columns:64px 1fr;gap:8px;align-items:center}
+  .cf-l{font-size:10.5px;color:var(--gray);font-weight:600;text-align:right}
+  .cf-bar{height:24px;display:flex;align-items:center}
+  .cf-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding:0 9px;color:#fff;font-weight:700;font-size:11px;min-width:54px}
+  .cf-foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:11px;color:var(--gray);font-weight:500;border-top:1px solid var(--line-2);padding-top:10px}
+  .cf-foot b{color:var(--ink);font-weight:800}
+  .block-head{display:flex;align-items:center;gap:10px;margin:6px 0 14px;padding:14px 18px;border-radius:12px}
+  .block-head.aq{background:var(--green-soft)}
+  .block-head.au{background:var(--slate-soft)}
+  .block-head.ev{background:var(--blue-soft)}
+  .block-head .bh-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff}
+  .block-head.aq .bh-icon{background:var(--green)}
+  .block-head.au .bh-icon{background:var(--slate)}
+  .block-head.ev .bh-icon{background:var(--blue)}
+  .block-head .bh-t{font-size:15px;font-weight:800}
+  .block-head .bh-s{font-size:12px;font-weight:600;margin-top:1px}
+  .block-head.aq .bh-t{color:var(--green-dark)} .block-head.aq .bh-s{color:var(--green-dark);opacity:.8}
+  .block-head.au .bh-t{color:var(--slate)} .block-head.au .bh-s{color:var(--slate);opacity:.8}
+  .block-head.ev .bh-t{color:var(--blue)} .block-head.ev .bh-s{color:var(--blue);opacity:.8}
+  .block-head .bh-stat{margin-left:auto;text-align:right;font-size:12px;font-weight:700}
+  .block-head.aq .bh-stat{color:var(--green-dark)} .block-head.au .bh-stat{color:var(--slate)} .block-head.ev .bh-stat{color:var(--blue)}
+  .step{display:grid;grid-template-columns:48px 1fr;gap:16px;padding:20px 0;border-bottom:1px solid var(--line)}
+  .step:last-child{border-bottom:none}
+  .step .num{width:48px;height:48px;border-radius:12px;background:var(--green);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800}
+  .step.amber .num{background:var(--amber);color:#fff}
+  .step.slate .num{background:var(--slate);color:#fff}
+  .step.blue .num{background:var(--blue);color:#fff}
+  .step .body h3{font-size:16px;font-weight:800;margin-bottom:6px}
+  .step .body p{font-size:13.5px;color:var(--ink-2);line-height:1.6;margin-bottom:8px}
+  .step .meta-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .step .mtag{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;background:var(--green-soft);color:var(--green-dark)}
+  .step .mtag.cost{background:#FBF1DF;color:#854F0B}
+  .step .mtag.kpi{background:var(--slate-soft);color:var(--slate)}
+  .checklist{list-style:none;padding:0;margin:0}
+  .checklist li{display:flex;gap:10px;align-items:flex-start;padding:9px 0;font-size:13.5px;color:var(--ink-2);line-height:1.5}
+  .checklist li::before{content:"";width:18px;height:18px;border-radius:5px;border:2px solid var(--green);flex-shrink:0;margin-top:2px}
+  .checklist li b{font-weight:800}
+  .proj{display:grid;grid-template-columns:1fr 1fr;gap:0;border:2px solid var(--ink);border-radius:16px;overflow:hidden;margin:6px 0 8px}
+  .proj > div{padding:22px 24px}
+  .proj .now{background:#fff} .proj .fut{background:var(--green);color:var(--ink)}
+  .proj .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;opacity:.7}
+  .proj .big{font-size:34px;font-weight:800;letter-spacing:-1.2px;margin:6px 0 2px;line-height:1}
+  .proj .now .big{color:var(--gray)}
+  .proj .desc{font-size:12.5px;font-weight:500}
+  .proj .now .desc{color:var(--gray)} .proj .fut .desc{color:rgba(13,13,13,.7)}
+  footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  footer .lg{font-weight:800;font-size:15px} footer .lg .k{color:var(--green)}
+  footer small{font-size:11px;color:var(--gray-soft)}
+  @media(max-width:760px){
+    .kpis{grid-template-columns:repeat(2,1fr)} .insight,.callout,.stage-grid,.cf-grid,.proj,.obj-grid{grid-template-columns:1fr}
+    .wrap{padding:0 16px 48px} .tabs{overflow-x:auto} .tab{white-space:nowrap;padding:12px 14px}
+    .fstep{grid-template-columns:100px 1fr;gap:10px}
+    thead th,tbody td,tfoot td{padding-left:6px;padding-right:6px;font-size:11px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><span class="k">Keep</span><span class="a">ads</span><small>performance &amp; estratégia</small></div>
+    <div class="head-meta"><div class="cli">ASSERJ</div><div class="per">Associativismo Varejista · Instagram · Ago/25 a Jun/26</div></div>
+  </header>
+  <div class="tabs">
+    <button class="tab active" data-tab="obj">Visão por Objetivo</button>
+    <button class="tab" data-tab="funil">Funil Completo</button>
+    <button class="tab" data-tab="camp">Funil por Campanha</button>
+    <button class="tab" data-tab="plano">Plano de Ação</button>
+  </div>
+
+  <div class="panel active" id="panel-obj">
+    <div class="report-title">
+      <span class="tag">Relatório de Performance</span>
+      <h1>Funil de Seguidores por Objetivo de Campanha</h1>
+      <p>A conta trabalha três frentes: <b>aquisição</b> de seguidor qualificado (o always-on de crescimento), <b>autoridade</b> (alcance e engajamento que constroem o posicionamento setorial) e <b>eventos</b> (cliques para SRE, Conecta Varejo e Super Negócios). Cada bloco tem um objetivo próprio e é medido pela métrica certa.</p>
+    </div>
+    <div class="callout">
+      <div class="real">
+        <div class="lbl">CPS real de aquisição</div>
+        <div class="big">R$ 1,09</div>
+        <div class="desc">Abaixo da meta do briefing (R$ 1,50 a 4,00). A conta compra seguidor qualificado muito barato: R$ 14 mil viraram 12.910 seguidores.</div>
+      </div>
+      <div class="mix">
+        <div class="lbl">CPS médio "cru" (verba toda)</div>
+        <div class="big">R$ 3,62</div>
+        <div class="desc">Distorcido pela verba de autoridade e eventos, que não têm objetivo de seguidor. O número real de aquisição é 3x melhor.</div>
+      </div>
+    </div>
+    <div class="kpis">
+      <div class="kpi dark"><div class="lbl">Investimento total</div><div class="val">R$ 47 mil</div><div class="sub">11 meses de operação</div></div>
+      <div class="kpi green"><div class="lbl">Seguidores (aquisição)</div><div class="val">12.910</div><div class="sub">CPS R$ 1,09</div></div>
+      <div class="kpi"><div class="lbl">Verba em aquisição</div><div class="val">30%</div><div class="sub">R$ 14.061</div></div>
+      <div class="kpi"><div class="lbl">Verba em autoridade</div><div class="val">65%</div><div class="sub">R$ 30.934 · 105 seg</div></div>
+    </div>
+    <div class="section">
+      <div class="section-head"><span class="bar"></span><h2>Para que serviu cada real investido</h2><span class="hint">3 blocos · 3 objetivos diferentes</span></div>
+      <div class="obj-grid">
+        <div class="obj-card">
+          <div class="top"><span class="pill" style="background:#00CA9E"></span><span class="name">Aquisição</span><span class="role aq">Seguidor</span></div>
+          <div class="gasto">R$ 14.061</div><div class="meta">12.910 seguidores · 39 campanhas</div>
+          <div class="cps" style="color:var(--green-dark)">CPS R$ 1,09 · dentro da meta</div>
+        </div>
+        <div class="obj-card">
+          <div class="top"><span class="pill" style="background:#5B6472"></span><span class="name">Autoridade</span><span class="role no">Alcance</span></div>
+          <div class="gasto">R$ 30.934</div><div class="meta">105 seguidores · 17 campanhas</div>
+          <div class="cps" style="color:var(--gray)">objetivo é posicionamento</div>
+        </div>
+        <div class="obj-card">
+          <div class="top"><span class="pill" style="background:#3B7DD8"></span><span class="name">Eventos</span><span class="role ev">Clique</span></div>
+          <div class="gasto">R$ 2.305</div><div class="meta">2.397 cliques · 7 campanhas</div>
+          <div class="cps" style="color:var(--blue)">objetivo é inscrição</div>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-head"><span class="bar"></span><h2>Verba por bloco × CPS real de aquisição</h2><span class="hint">barras = R$ investido · linha = CPS aquisição</span></div>
+      <div class="card">
+        <div class="legend">
+          <span><span class="dot" style="background:#00CA9E"></span>Aquisição</span>
+          <span><span class="dot" style="background:#5B6472"></span>Autoridade</span>
+          <span><span class="dot" style="background:#3B7DD8"></span>Eventos</span>
+          <span><span class="lin" style="background:#0D0D0D"></span>CPS aquisição (R$)</span>
+        </div>
+        <div class="chart-box"><canvas id="ch1"></canvas></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-head"><span class="bar"></span><h2>Funil de aquisição mês a mês</h2><span class="hint">campanhas de seguidor</span></div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Mês</th><th>Verba aquisição</th><th>Seguidores</th><th>CPS</th><th>Verba autoridade</th><th>Verba eventos</th><th>Total mês</th></tr></thead>
+          <tbody><tr><td>Ago/25</td><td>R$ 1.567</td><td class="seg-cell">731</td><td class="cps-good">R$ 2,14</td><td>R$ 2.515</td><td>R$ 1.742</td><td>R$ 5.824</td></tr>
+<tr><td>Set/25</td><td>R$ 1.030</td><td class="seg-cell">308</td><td class="cps-good">R$ 3,34</td><td>R$ 2.715</td><td>R$ 0</td><td>R$ 3.745</td></tr>
+<tr><td>Out/25</td><td>R$ 543</td><td class="seg-cell">332</td><td class="cps-good">R$ 1,63</td><td>R$ 2.239</td><td>R$ 539</td><td>R$ 3.321</td></tr>
+<tr><td>Nov/25</td><td>R$ 614</td><td class="seg-cell">402</td><td class="cps-good">R$ 1,53</td><td>R$ 2.906</td><td>R$ 23</td><td>R$ 3.543</td></tr>
+<tr class="best"><td>Dez/25</td><td>R$ 991</td><td class="seg-cell">1.631</td><td class="cps-good">R$ 0,61</td><td>R$ 2.943</td><td>R$ 0</td><td>R$ 3.934</td></tr>
+<tr><td>Jan/26</td><td>R$ 1.445</td><td class="seg-cell">1.691</td><td class="cps-good">R$ 0,85</td><td>R$ 2.557</td><td>R$ 0</td><td>R$ 4.002</td></tr>
+<tr><td>Fev/26</td><td>R$ 1.241</td><td class="seg-cell">1.526</td><td class="cps-good">R$ 0,81</td><td>R$ 2.317</td><td>R$ 0</td><td>R$ 3.558</td></tr>
+<tr><td>Mar/26</td><td>R$ 1.602</td><td class="seg-cell">2.145</td><td class="cps-good">R$ 0,75</td><td>R$ 3.104</td><td>R$ 0</td><td>R$ 4.706</td></tr>
+<tr><td>Abr/26</td><td>R$ 2.023</td><td class="seg-cell">1.518</td><td class="cps-good">R$ 1,33</td><td>R$ 2.721</td><td>R$ 0</td><td>R$ 4.744</td></tr>
+<tr><td>Mai/26</td><td>R$ 1.503</td><td class="seg-cell">1.479</td><td class="cps-good">R$ 1,02</td><td>R$ 3.791</td><td>R$ 0</td><td>R$ 5.294</td></tr>
+<tr><td>Jun/26</td><td>R$ 1.503</td><td class="seg-cell">1.147</td><td class="cps-good">R$ 1,31</td><td>R$ 3.125</td><td>R$ 0</td><td>R$ 4.628</td></tr>
+</tbody>
+          <tfoot><tr><td>Total</td><td>R$ 14.061</td><td>12.910</td><td>R$ 1,09</td><td>R$ 30.934</td><td>R$ 2.305</td><td>R$ 47.300</td></tr></tfoot>
+        </table>
+        <p style="font-size:11px;color:var(--gray-soft);margin-top:12px">Bolinha verde marca o melhor mês de CPS. Meta de CPS de aquisição do briefing: R$ 1,50 a 4,00. A conta opera consistentemente dentro ou abaixo da meta.</p>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-head"><span class="bar"></span><h2>Leitura estratégica</h2></div>
+      <div class="insight">
+        <div class="ibox win">
+          <h3>Aquisição de elite</h3>
+          <p>CPS de <b>R$ 1,09</b>, abaixo da meta do briefing. A campanha de <b>visitas ao perfil</b> é a máquina de seguidor da conta: 11.708 seguidores a R$ 0,95. De dez a mar, o CPS ficou abaixo de R$ 0,85. Isso é performance de referência para B2B.</p>
+        </div>
+        <div class="ibox loss">
+          <h3>65% da verba em autoridade</h3>
+          <p><b>R$ 30.934</b> em alcance e engajamento geraram só 105 seguidores. É o dobro do peso ideal. Realocar parte para a aquisição, que já roda a R$ 1,09, multiplicaria o crescimento sem elevar o investimento total.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-funil">
+    <div class="report-title">
+      <span class="tag">Funil Completo</span>
+      <h1>Da Impressão ao Seguidor</h1>
+      <p>O caminho completo do investimento: quantas pessoas foram alcançadas, quantas clicaram, quantas visitaram o perfil e quantas viraram seguidor. Cada etapa revela onde o funil ganha eficiência e onde perde gente.</p>
+    </div>
+    <div class="section" style="margin-top:8px">
+      <div class="section-head"><span class="bar"></span><h2>As 4 etapas do funil no período</h2><span class="hint">total acumulado · Ago/25 a Jun/26</span></div>
+      <div class="card">
+        <div class="funnel">
+          <div class="fstep"><div class="flabel"><div class="fn">Alcance</div><div class="fv">pessoas atingidas</div></div>
+            <div class="fbar-track"><div class="fbar" style="background:#0D0D0D;width:100%">14.175.969</div></div></div>
+          <div class="fstep"><div class="flabel"><div class="fn">Cliques no link</div><div class="fv">0.44% do alcance</div></div>
+            <div class="fbar-track"><div class="fbar" style="background:#5B6472;width:44%">62.591</div><div class="fconv">passa 0.44%</div></div></div>
+          <div class="fstep"><div class="flabel"><div class="fn">Visitas ao perfil</div><div class="fv">inclui origem orgânica†</div></div>
+            <div class="fbar-track"><div class="fbar" style="background:#00a382;width:42%">62.836</div><div class="fconv">índice 100%†</div></div></div>
+          <div class="fstep"><div class="flabel"><div class="fn">Seguidores</div><div class="fv">20.8% das visitas</div></div>
+            <div class="fbar-track"><div class="fbar" style="background:#00CA9E;width:28%;color:#0D0D0D">13.076</div><div class="fconv">passa 20.8%</div></div></div>
+        </div>
+        <p style="font-size:11px;color:var(--gray-soft);margin-top:16px">As barras não estão em escala proporcional ao alcance (a queda do topo é grande demais para caber). † O índice de visitas compara o total de visitas ao perfil com os cliques no link, mas não é conversão linear: as visitas incluem quem chega pelo toque no @ do perfil e pelo alcance orgânico, sem passar pelo clique pago.</p>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-head"><span class="bar"></span><h2>Onde o funil ganha e onde perde</h2></div>
+      <div class="stage-grid">
+        <div class="stage"><div class="st">Alcance → Clique</div><div class="sv">0.44%</div>
+          <div class="sd">Etapa mais seletiva. De cada 1.000 pessoas alcançadas, cerca de 4 clicam. Coerente para topo de funil B2B.</div></div>
+        <div class="stage hl"><div class="st">Visitas / Cliques (índice)</div><div class="sv">100%</div>
+          <div class="sd">Não é conversão linear: as visitas incluem origem orgânica e toques no @. Um índice alto mostra que o conteúdo atrai visita por vários caminhos.</div></div>
+        <div class="stage"><div class="st">Visita → Seguidor</div><div class="sv">20.8%</div>
+          <div class="sd">A etapa que decide o custo. A ASSERJ converte forte porque a campanha de visitas ao perfil leva público já qualificado.</div></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-head"><span class="bar"></span><h2>Visitas ao perfil × conversão em seguidor</h2><span class="hint">barras = visitas · linha = % que virou seguidor</span></div>
+      <div class="card">
+        <div class="legend"><span><span class="dot" style="background:#5B6472"></span>Visitas ao perfil</span><span><span class="lin" style="background:#00CA9E"></span>Taxa visita → seguidor (%)</span></div>
+        <div class="chart-box"><canvas id="ch2"></canvas></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-head"><span class="bar"></span><h2>Tabela do funil completo</h2><span class="hint">todas as campanhas · todas as etapas</span></div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Mês</th><th>Alcance</th><th>Cliques</th><th>Visitas</th><th>Seguidores</th><th>Alc→Clq</th><th>Vis/Clq†</th><th>Vis→Seg</th></tr></thead>
+          <tbody><tr><td>Ago/25</td><td>1.760.367</td><td>7.158</td><td>6.986</td><td class="seg-cell">798</td><td>0.41%</td><td>98%</td><td class="cps-mid">11.4%</td></tr>
+<tr><td>Set/25</td><td>1.282.432</td><td>2.664</td><td>3.587</td><td class="seg-cell">316</td><td>0.21%</td><td>135%</td><td class="cps-mid">8.8%</td></tr>
+<tr><td>Out/25</td><td>898.290</td><td>3.874</td><td>3.480</td><td class="seg-cell">340</td><td>0.43%</td><td>90%</td><td class="cps-mid">9.8%</td></tr>
+<tr><td>Nov/25</td><td>1.256.267</td><td>3.013</td><td>3.501</td><td class="seg-cell">418</td><td>0.24%</td><td>116%</td><td class="cps-mid">11.9%</td></tr>
+<tr><td>Dez/25</td><td>1.242.662</td><td>4.679</td><td>5.113</td><td class="seg-cell">1.657</td><td>0.38%</td><td>109%</td><td class="cps-good">32.4%</td></tr>
+<tr><td>Jan/26</td><td>1.342.832</td><td>6.325</td><td>6.596</td><td class="seg-cell">1.695</td><td>0.47%</td><td>104%</td><td class="cps-good">25.7%</td></tr>
+<tr><td>Fev/26</td><td>1.200.109</td><td>6.400</td><td>6.364</td><td class="seg-cell">1.534</td><td>0.53%</td><td>99%</td><td class="cps-good">24.1%</td></tr>
+<tr><td>Mar/26</td><td>1.387.159</td><td>7.847</td><td>7.690</td><td class="seg-cell">2.146</td><td>0.57%</td><td>98%</td><td class="cps-good">27.9%</td></tr>
+<tr><td>Abr/26</td><td>1.309.337</td><td>10.255</td><td>9.775</td><td class="seg-cell">1.525</td><td>0.78%</td><td>95%</td><td class="cps-good">15.6%</td></tr>
+<tr><td>Mai/26</td><td>1.344.480</td><td>5.385</td><td>5.161</td><td class="seg-cell">1.495</td><td>0.40%</td><td>96%</td><td class="cps-good">29.0%</td></tr>
+<tr><td>Jun/26</td><td>1.152.034</td><td>4.991</td><td>4.583</td><td class="seg-cell">1.152</td><td>0.43%</td><td>92%</td><td class="cps-good">25.1%</td></tr>
+</tbody>
+          <tfoot><tr><td>Total</td><td>14.175.969</td><td>62.591</td><td>62.836</td><td>13.076</td><td>0.44%</td><td>100%</td><td>20.8%</td></tr></tfoot>
+        </table>
+        <p style="font-size:11px;color:var(--gray-soft);margin-top:12px">† A relação Visitas/Cliques pode passar de 100% porque o Instagram conta visitas vindas também do alcance orgânico, não só do clique pago. As etapas confiáveis são Alcance→Clique e Visita→Seguidor.</p>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-head"><span class="bar"></span><h2>Leitura estratégica</h2></div>
+      <div class="insight">
+        <div class="ibox win"><h3>A conversão é o ponto forte</h3>
+          <p>A etapa Visita até Seguidor roda a <b>20.8%</b>, muito acima do padrão. O motivo é estrutural: a campanha de <b>visitas ao perfil</b> leva público qualificado direto ao perfil, e uma fatia grande segue. É o que sustenta o CPS de R$ 1,09.</p></div>
+        <div class="ibox neutral"><h3>O topo é caro na autoridade</h3>
+          <p>O grosso do alcance (14.175.969) vem das campanhas de autoridade, que quase não convertem em seguidor. O funil de aquisição é enxuto e eficiente. A conta cresce pela base qualificada, não pelo topo amplo.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-camp">
+    <div class="report-title">
+      <span class="tag">Funil por Campanha</span>
+      <h1>O Funil de Cada Campanha</h1>
+      <p>Cada campanha separada nos três blocos da conta: <b>aquisição</b> (gera seguidor), <b>autoridade</b> (constrói alcance e engajamento) e <b>eventos</b> (gera clique para inscrição). Assim dá para ver exatamente quais peças puxaram o resultado.</p>
+    </div>
+    <div class="block-head aq"><div class="bh-icon">A</div>
+      <div><div class="bh-t">Campanhas de Aquisição</div><div class="bh-s">existem para gerar seguidor</div></div>
+      <div class="bh-stat">39 campanhas · R$ 14.061 · 12.910 seguidores · CPS R$ 1,09</div></div>
+    <div class="section" style="margin-top:18px">
+      <div class="section-head"><span class="bar"></span><h2>As 6 campanhas que mais geraram seguidor</h2><span class="hint">funil de cada uma</span></div>
+      <div class="cf-grid">
+<div class="cf-card">
+<div class="cf-head"><span class="cf-name">00_1 [ABO] [TRAFEGO] [VISITAS NO PERFIL] [INTERESSES] [IG]</span><span class="cf-pill" style="background:#00CA9E">Aquisição</span></div>
+<div class="cf-funnel"><div class="cf-row"><span class="cf-l">Alcance</span><div class="cf-bar"><div class="cf-fill" style="width:100%;background:#0D0D0D">985.429</div></div></div>
+<div class="cf-row"><span class="cf-l">Cliques</span><div class="cf-bar"><div class="cf-fill" style="width:78%;background:#5B6472">40.851</div></div></div>
+<div class="cf-row"><span class="cf-l">Visitas</span><div class="cf-bar"><div class="cf-fill" style="width:78%;background:#00a382">40.395</div></div></div>
+<div class="cf-row"><span class="cf-l">Seguidores</span><div class="cf-bar"><div class="cf-fill" style="width:70%;background:#00CA9E;color:#0D0D0D">11.708</div></div></div></div>
+<div class="cf-foot"><span>Investido <b>R$ 11.123</b></span><span>CPS <b style="color:#00a382">R$ 0,95</b></span><span>Vis→Seg <b>29.0%</b></span></div>
+</div><div class="cf-card">
+<div class="cf-head"><span class="cf-name">[TRÁFEGO] [SEGUIDORES]</span><span class="cf-pill" style="background:#00CA9E">Aquisição</span></div>
+<div class="cf-funnel"><div class="cf-row"><span class="cf-l">Alcance</span><div class="cf-bar"><div class="cf-fill" style="width:100%;background:#0D0D0D">103.784</div></div></div>
+<div class="cf-row"><span class="cf-l">Cliques</span><div class="cf-bar"><div class="cf-fill" style="width:74%;background:#5B6472">4.129</div></div></div>
+<div class="cf-row"><span class="cf-l">Visitas</span><div class="cf-bar"><div class="cf-fill" style="width:74%;background:#00a382">4.169</div></div></div>
+<div class="cf-row"><span class="cf-l">Seguidores</span><div class="cf-bar"><div class="cf-fill" style="width:55%;background:#00CA9E;color:#0D0D0D">422</div></div></div></div>
+<div class="cf-foot"><span>Investido <b>R$ 856</b></span><span>CPS <b style="color:#00a382">R$ 2,03</b></span><span>Vis→Seg <b>10.1%</b></span></div>
+</div><div class="cf-card">
+<div class="cf-head"><span class="cf-name">00_1 [ABO] [TRAFEGO] [VISITAS NO PERFIL] [ADV+] [IG]</span><span class="cf-pill" style="background:#00CA9E">Aquisição</span></div>
+<div class="cf-funnel"><div class="cf-row"><span class="cf-l">Alcance</span><div class="cf-bar"><div class="cf-fill" style="width:100%;background:#0D0D0D">27.360</div></div></div>
+<div class="cf-row"><span class="cf-l">Cliques</span><div class="cf-bar"><div class="cf-fill" style="width:69%;background:#5B6472">926</div></div></div>
+<div class="cf-row"><span class="cf-l">Visitas</span><div class="cf-bar"><div class="cf-fill" style="width:69%;background:#00a382">932</div></div></div>
+<div class="cf-row"><span class="cf-l">Seguidores</span><div class="cf-bar"><div class="cf-fill" style="width:53%;background:#00CA9E;color:#0D0D0D">173</div></div></div></div>
+<div class="cf-foot"><span>Investido <b>R$ 292</b></span><span>CPS <b style="color:#00a382">R$ 1,69</b></span><span>Vis→Seg <b>18.6%</b></span></div>
+</div><div class="cf-card">
+<div class="cf-head"><span class="cf-name">Post: 🎙️ No supermercado, cada setor...</span><span class="cf-pill" style="background:#00CA9E">Aquisição</span></div>
+<div class="cf-funnel"><div class="cf-row"><span class="cf-l">Alcance</span><div class="cf-bar"><div class="cf-fill" style="width:100%;background:#0D0D0D">14.681</div></div></div>
+<div class="cf-row"><span class="cf-l">Cliques</span><div class="cf-bar"><div class="cf-fill" style="width:66%;background:#5B6472">450</div></div></div>
+<div class="cf-row"><span class="cf-l">Visitas</span><div class="cf-bar"><div class="cf-fill" style="width:67%;background:#00a382">491</div></div></div>
+<div class="cf-row"><span class="cf-l">Seguidores</span><div class="cf-bar"><div class="cf-fill" style="width:53%;background:#00CA9E;color:#0D0D0D">117</div></div></div></div>
+<div class="cf-foot"><span>Investido <b>R$ 325</b></span><span>CPS <b style="color:#00a382">R$ 2,78</b></span><span>Vis→Seg <b>23.8%</b></span></div>
+</div><div class="cf-card">
+<div class="cf-head"><span class="cf-name">Post: 🚀 O setor supermercadista...</span><span class="cf-pill" style="background:#00CA9E">Aquisição</span></div>
+<div class="cf-funnel"><div class="cf-row"><span class="cf-l">Alcance</span><div class="cf-bar"><div class="cf-fill" style="width:100%;background:#0D0D0D">8.920</div></div></div>
+<div class="cf-row"><span class="cf-l">Cliques</span><div class="cf-bar"><div class="cf-fill" style="width:62%;background:#5B6472">217</div></div></div>
+<div class="cf-row"><span class="cf-l">Visitas</span><div class="cf-bar"><div class="cf-fill" style="width:62%;background:#00a382">214</div></div></div>
+<div class="cf-row"><span class="cf-l">Seguidores</span><div class="cf-bar"><div class="cf-fill" style="width:46%;background:#00CA9E;color:#0D0D0D">47</div></div></div></div>
+<div class="cf-foot"><span>Investido <b>R$ 90</b></span><span>CPS <b style="color:#00a382">R$ 1,90</b></span><span>Vis→Seg <b>22.0%</b></span></div>
+</div><div class="cf-card">
+<div class="cf-head"><span class="cf-name">00_1 [ABO] [TRAFEGO] [VISITAS NO PERFIL] [INTERESSES] [IG] [</span><span class="cf-pill" style="background:#00CA9E">Aquisição</span></div>
+<div class="cf-funnel"><div class="cf-row"><span class="cf-l">Alcance</span><div class="cf-bar"><div class="cf-fill" style="width:100%;background:#0D0D0D">6.391</div></div></div>
+<div class="cf-row"><span class="cf-l">Cliques</span><div class="cf-bar"><div class="cf-fill" style="width:58%;background:#5B6472">126</div></div></div>
+<div class="cf-row"><span class="cf-l">Visitas</span><div class="cf-bar"><div class="cf-fill" style="width:60%;background:#00a382">155</div></div></div>
+<div class="cf-row"><span class="cf-l">Seguidores</span><div class="cf-bar"><div class="cf-fill" style="width:47%;background:#00CA9E;color:#0D0D0D">46</div></div></div></div>
+<div class="cf-foot"><span>Investido <b>R$ 43</b></span><span>CPS <b style="color:#00a382">R$ 0,93</b></span><span>Vis→Seg <b>29.7%</b></span></div>
+</div>
+      </div>
+      <p style="font-size:11px;color:var(--gray-soft);margin-top:14px">As barras usam escala logarítmica para caber visualmente. Os números dentro das barras são os valores reais.</p>
+    </div>
+    <div class="section">
+      <div class="section-head"><span class="bar"></span><h2>Todas as campanhas de aquisição</h2><span class="hint">39 campanhas · por seguidores</span></div>
+      <div class="card"><table>
+        <thead><tr><th>Campanha</th><th>Investido</th><th>Alcance</th><th>Visitas</th><th>Seguidores</th><th>CPS</th><th>Vis→Seg</th></tr></thead>
+        <tbody>
+<tr><td>00_1 [ABO] [TRAFEGO] [VISITAS NO PERFIL] [IN</td><td>R$ 11.123</td><td>985.429</td><td>40.395</td><td class="seg-cell">11.708</td><td class="cps-good">R$ 0,95</td><td>29.0%</td></tr>
+<tr><td>[TRÁFEGO] [SEGUIDORES]</td><td>R$ 856</td><td>103.784</td><td>4.169</td><td class="seg-cell">422</td><td class="cps-good">R$ 2,03</td><td>10.1%</td></tr>
+<tr><td>00_1 [ABO] [TRAFEGO] [VISITAS NO PERFIL] [AD</td><td>R$ 292</td><td>27.360</td><td>932</td><td class="seg-cell">173</td><td class="cps-good">R$ 1,69</td><td>18.6%</td></tr>
+<tr><td>Post: 🎙️ No supermercado, cada setor...</td><td>R$ 325</td><td>14.681</td><td>491</td><td class="seg-cell">117</td><td class="cps-good">R$ 2,78</td><td>23.8%</td></tr>
+<tr><td>Post: 🚀 O setor supermercadista...</td><td>R$ 90</td><td>8.920</td><td>214</td><td class="seg-cell">47</td><td class="cps-good">R$ 1,90</td><td>22.0%</td></tr>
+<tr><td>00_1 [ABO] [TRAFEGO] [VISITAS NO PERFIL] [IN</td><td>R$ 43</td><td>6.391</td><td>155</td><td class="seg-cell">46</td><td class="cps-good">R$ 0,93</td><td>29.7%</td></tr>
+<tr><td>Post: 🎉 Hoje celebramos um marco...</td><td>R$ 90</td><td>7.601</td><td>233</td><td class="seg-cell">37</td><td class="cps-good">R$ 2,42</td><td>15.9%</td></tr>
+<tr><td>Post: 🔎 Visitar o Grupo Alvorada foi...</td><td>R$ 20</td><td>1.920</td><td>87</td><td class="seg-cell">29</td><td class="cps-good">R$ 0,69</td><td>33.3%</td></tr>
+<tr><td>Post: A sua parada obrigatória dos...</td><td>R$ 30</td><td>1.693</td><td>49</td><td class="seg-cell">24</td><td class="cps-good">R$ 1,24</td><td>49.0%</td></tr>
+<tr><td>Post: O pedido do...</td><td>R$ 72</td><td>3.002</td><td>75</td><td class="seg-cell">20</td><td class="cps-good">R$ 3,62</td><td>26.7%</td></tr>
+<tr><td>Post: A nova unidade do Supermarket...</td><td>R$ 12</td><td>1.209</td><td>35</td><td class="seg-cell">19</td><td class="cps-good">R$ 0,63</td><td>54.3%</td></tr>
+<tr><td>Post: Está chegando a hora!De 12 a...</td><td>R$ 29</td><td>1.981</td><td>57</td><td class="seg-cell">19</td><td class="cps-good">R$ 1,51</td><td>33.3%</td></tr>
+<tr><td>Post: MULTIDISCIPLINAR, INSPIRADOR E...</td><td>R$ 75</td><td>9.576</td><td>190</td><td class="seg-cell">17</td><td class="cps-mid">R$ 4,40</td><td>8.9%</td></tr>
+<tr><td>Post: Está chegando a hora! ✨ De 12...</td><td>R$ 50</td><td>3.756</td><td>92</td><td class="seg-cell">17</td><td class="cps-good">R$ 2,92</td><td>18.5%</td></tr>
+<tr><td>Post: Foram 4 dias que ficaram na...</td><td>R$ 61</td><td>3.126</td><td>70</td><td class="seg-cell">16</td><td class="cps-good">R$ 3,81</td><td>22.9%</td></tr>
+<tr><td>Post: O que esperar do quarto e...</td><td>R$ 50</td><td>4.887</td><td>63</td><td class="seg-cell">16</td><td class="cps-good">R$ 3,12</td><td>25.4%</td></tr>
+<tr><td>Post: 🚀 Startups em ação no primeiro...</td><td>R$ 25</td><td>1.682</td><td>49</td><td class="seg-cell">15</td><td class="cps-good">R$ 1,66</td><td>30.6%</td></tr>
+<tr><td>Post: Mais um dia concluído com...</td><td>R$ 25</td><td>831</td><td>7</td><td class="seg-cell">14</td><td class="cps-good">R$ 1,78</td><td>200.0%</td></tr>
+<tr><td>Post: Se dizem por aí que o varejo...</td><td>R$ 45</td><td>4.464</td><td>148</td><td class="seg-cell">14</td><td class="cps-good">R$ 3,21</td><td>9.5%</td></tr>
+<tr><td>Post: ⚡ Está lançado o Desafio...</td><td>R$ 30</td><td>1.756</td><td>53</td><td class="seg-cell">13</td><td class="cps-good">R$ 2,29</td><td>24.5%</td></tr>
+<tr><td>Post: 🐾✨ O setor supermercadista...</td><td>R$ 32</td><td>1.682</td><td>38</td><td class="seg-cell">13</td><td class="cps-good">R$ 2,44</td><td>34.2%</td></tr>
+<tr><td>Post: O terceiro dia da trilha...</td><td>R$ 50</td><td>4.253</td><td>70</td><td class="seg-cell">13</td><td class="cps-good">R$ 3,83</td><td>18.6%</td></tr>
+<tr><td>Post: 🎤 As primeiras palestras do...</td><td>R$ 25</td><td>1.282</td><td>15</td><td class="seg-cell">11</td><td class="cps-good">R$ 2,25</td><td>73.3%</td></tr>
+<tr><td>Post: 🔎 O que está movimentando o...</td><td>R$ 25</td><td>1.245</td><td>32</td><td class="seg-cell">11</td><td class="cps-good">R$ 2,30</td><td>34.4%</td></tr>
+<tr><td>Post: A cada batida, um momento...</td><td>R$ 25</td><td>1.718</td><td>31</td><td class="seg-cell">10</td><td class="cps-good">R$ 2,48</td><td>32.3%</td></tr>
+<tr><td>Post: Um palco, mais de 60...</td><td>R$ 28</td><td>1.458</td><td>49</td><td class="seg-cell">10</td><td class="cps-good">R$ 2,83</td><td>20.4%</td></tr>
+<tr><td>Post: ➡ “O passo a passo completo tá...</td><td>R$ 16</td><td>783</td><td>9</td><td class="seg-cell">10</td><td class="cps-good">R$ 1,60</td><td>111.1%</td></tr>
+<tr><td>Post: No terceiro dia de Rio...</td><td>R$ 15</td><td>893</td><td>11</td><td class="seg-cell">9</td><td class="cps-good">R$ 1,65</td><td>81.8%</td></tr>
+<tr><td>00_1 [ABO] [TRAFEGO] [VISITAS NO PERFIL] [IN</td><td>R$ 47</td><td>6.081</td><td>77</td><td class="seg-cell">7</td><td class="cps-mid">R$ 6,69</td><td>9.1%</td></tr>
+<tr><td>Post: Entre uma palestra e outra,...</td><td>R$ 15</td><td>1.185</td><td>47</td><td class="seg-cell">6</td><td class="cps-good">R$ 2,48</td><td>12.8%</td></tr>
+<tr><td>Post: Quando supermercadistas se...</td><td>R$ 15</td><td>810</td><td>23</td><td class="seg-cell">6</td><td class="cps-good">R$ 2,50</td><td>26.1%</td></tr>
+<tr><td>Post: A inteligência artificial não...</td><td>R$ 50</td><td>5.098</td><td>38</td><td class="seg-cell">6</td><td class="cps-bad">R$ 8,33</td><td>15.8%</td></tr>
+<tr><td>Post: Bernardinho, do vôlei, será o...</td><td>R$ 19</td><td>1.311</td><td>38</td><td class="seg-cell">4</td><td class="cps-mid">R$ 4,72</td><td>10.5%</td></tr>
+<tr><td>Post: 💡 O que diferencia um líder...</td><td>R$ 43</td><td>1.466</td><td>8</td><td class="seg-cell">4</td><td class="cps-bad">R$ 10,63</td><td>50.0%</td></tr>
+<tr><td>Post: ✨ SEU SUPERMERCADO COM O MIX...</td><td>R$ 32</td><td>1.145</td><td>18</td><td class="seg-cell">3</td><td class="cps-bad">R$ 10,54</td><td>16.7%</td></tr>
+<tr><td>Post: Uma palestra imperdível para...</td><td>R$ 10</td><td>660</td><td>12</td><td class="seg-cell">3</td><td class="cps-good">R$ 3,46</td><td>25.0%</td></tr>
+<tr><td>00_1 [ABO] [TRÁFEGO] [SEGUIDORES] [IG] [NRF]</td><td>R$ 223</td><td>2.640</td><td>76</td><td class="seg-cell">1</td><td class="cps-bad">R$ 222,70</td><td>1.3%</td></tr>
+<tr><td>Post: Será que você tem as...</td><td>R$ 20</td><td>1.480</td><td>42</td><td class="seg-cell">0</td><td class="">n/a</td><td>0.0%</td></tr>
+<tr><td>Post: 🔍 Você sabe o impacto direto...</td><td>R$ 32</td><td>1.041</td><td>18</td><td class="seg-cell">0</td><td class="">n/a</td><td>0.0%</td></tr>
+
+        </tbody>
+        <tfoot><tr><td>Total aquisição</td><td>R$ 14.061</td><td>·</td><td>·</td><td>12.910</td><td>R$ 1,09</td><td>·</td></tr></tfoot>
+      </table></div>
+    </div>
+    <div class="block-head au" style="margin-top:36px"><div class="bh-icon">B</div>
+      <div><div class="bh-t">Campanhas de Autoridade</div><div class="bh-s">alcance e engajamento, não geram seguidor direto</div></div>
+      <div class="bh-stat">17 campanhas · R$ 30.934 · 105 seguidores</div></div>
+    <div class="section" style="margin-top:18px">
+      <div class="section-head"><span class="bar"></span><h2>Todas as campanhas de autoridade</h2><span class="hint">17 campanhas · por verba</span></div>
+      <div class="card"><table>
+        <thead><tr><th>Campanha</th><th>Investido</th><th>Alcance</th><th>CTR</th><th>Visitas</th><th>Seguidores</th></tr></thead>
+        <tbody>
+<tr><td>00_1 [ABO] [RECONHECIMENTO] [BIG ALCANCE] [I</td><td>R$ 10.654</td><td>5.917.880</td><td>0.06%</td><td>4.096</td><td>23</td></tr>
+<tr><td>00_1 [ABO] [ENGAJAMENTO] [BIG INTERACAO] [IN</td><td>R$ 9.315</td><td>1.400.229</td><td>0.30%</td><td>4.247</td><td>50</td></tr>
+<tr><td>00_2 [ABO] [RECONHECIMENTO] [ALCANCE] [REMAR</td><td>R$ 4.442</td><td>2.180.637</td><td>0.10%</td><td>2.431</td><td>11</td></tr>
+<tr><td>00_1 [ABO] [RECONHECIMENTO] [ALCANCE] [INTER</td><td>R$ 1.541</td><td>869.331</td><td>0.07%</td><td>881</td><td>0</td></tr>
+<tr><td>[ENGAJAMENTO] [AGOSTO]</td><td>R$ 1.256</td><td>205.113</td><td>0.22%</td><td>260</td><td>1</td></tr>
+<tr><td>00_1 [ABO] [RECONHECIMENTO] [ALCANCE] [ADV+]</td><td>R$ 824</td><td>495.568</td><td>0.06%</td><td>253</td><td>7</td></tr>
+<tr><td>00_1 [ABO] [ENGAJAMENTO] [PUBLICAÇÃO] [INTER</td><td>R$ 736</td><td>136.695</td><td>0.25%</td><td>615</td><td>6</td></tr>
+<tr><td>[ALCANCE] [AGOSTO]</td><td>R$ 661</td><td>501.630</td><td>0.04%</td><td>329</td><td>0</td></tr>
+<tr><td>[ENGAJAMENTO] [POSTS EXTRAS]</td><td>R$ 290</td><td>44.733</td><td>0.23%</td><td>34</td><td>1</td></tr>
+<tr><td>00_1 [ABO] [ENGAJAMENTO] [POST] [IG] [NRF]</td><td>R$ 230</td><td>7.229</td><td>0.07%</td><td>3</td><td>0</td></tr>
+<tr><td>00_1 [ABO] [ENGAJAMENTO] [VIDEO VIEW] [IG] [</td><td>R$ 224</td><td>5.390</td><td>0.07%</td><td>9</td><td>0</td></tr>
+<tr><td>00_1 [ABO] [RECONHECIMENTO] [ALCANCE] [INTER</td><td>R$ 202</td><td>156.954</td><td>0.05%</td><td>134</td><td>0</td></tr>
+<tr><td>00_1 [ABO] [RECONHECIMENTO] [ALCANCE] [INTER</td><td>R$ 197</td><td>146.224</td><td>0.04%</td><td>105</td><td>0</td></tr>
+<tr><td>00_1 [ABO] [ENGAJAMENTO] [VIDEO VIEW] [INTER</td><td>R$ 193</td><td>20.516</td><td>0.28%</td><td>52</td><td>1</td></tr>
+<tr><td>00_2 [ABO] [ENGAJAMENTO] [PUBLICAÇÃO] [REMAR</td><td>R$ 136</td><td>16.705</td><td>0.37%</td><td>68</td><td>5</td></tr>
+<tr><td>00_1 [ABO] [RECONHECIMENTO] [ALCANCE] [INTER</td><td>R$ 23</td><td>20.176</td><td>0.07%</td><td>14</td><td>0</td></tr>
+<tr><td>00_1 [ABO] [ENGAJAMENTO] [SITE] [INTERESSES]</td><td>R$ 11</td><td>1.085</td><td>0.83%</td><td>3</td><td>0</td></tr>
+
+        </tbody>
+        <tfoot><tr><td>Total autoridade</td><td>R$ 30.934</td><td>·</td><td>·</td><td>·</td><td>105</td></tr></tfoot>
+      </table>
+      <p style="font-size:11px;color:var(--gray-soft);margin-top:12px">Não avaliar por CPS: o objetivo é alcance e posicionamento setorial, não seguidor. O ponto de atenção é o tamanho: R$ 30.934 são 65% de toda a verba.</p></div>
+    </div>
+    <div class="block-head ev" style="margin-top:36px"><div class="bh-icon">C</div>
+      <div><div class="bh-t">Campanhas de Eventos</div><div class="bh-s">cliques para inscrição em SRE, Conecta Varejo e Super Negócios</div></div>
+      <div class="bh-stat">7 campanhas · R$ 2.305 · 2.397 cliques</div></div>
+    <div class="section" style="margin-top:18px">
+      <div class="section-head"><span class="bar"></span><h2>Todas as campanhas de eventos</h2><span class="hint">medidas por clique e CTR, não por seguidor</span></div>
+      <div class="card"><table>
+        <thead><tr><th>Campanha</th><th>Investido</th><th>Alcance</th><th>Cliques</th><th>CTR</th></tr></thead>
+        <tbody>
+<tr><td>00_1 [ABO] [TRAFEGO] [SITE] [INTERESSES] [IG</td><td>R$ 563</td><td>72.581</td><td>1.229</td><td class="cps-mid">1.69%</td></tr>
+<tr><td>[ALCANCE] [CONECTA]</td><td>R$ 580</td><td>691.383</td><td>698</td><td class="cps-bad">0.10%</td></tr>
+<tr><td>[ENGAJAMENTO] [CONECTA]</td><td>R$ 1.037</td><td>48.359</td><td>373</td><td class="cps-bad">0.77%</td></tr>
+<tr><td>Post: ✨ O Conecta Varejo acabou… mas...</td><td>R$ 36</td><td>1.818</td><td>34</td><td class="cps-good">1.87%</td></tr>
+<tr><td>Post: Último dia de ASSERJ Hub, e o...</td><td>R$ 40</td><td>2.849</td><td>27</td><td class="cps-mid">0.95%</td></tr>
+<tr><td>Post: Segundo dia de Conecta Varejo...</td><td>R$ 25</td><td>1.331</td><td>24</td><td class="cps-good">1.80%</td></tr>
+<tr><td>Post: ✨ Que dia! O Conecta Varejo...</td><td>R$ 25</td><td>1.273</td><td>12</td><td class="cps-mid">0.94%</td></tr>
+
+        </tbody>
+        <tfoot><tr><td>Total eventos</td><td>R$ 2.305</td><td>·</td><td>2.397</td><td>·</td></tr></tfoot>
+      </table>
+      <p style="font-size:11px;color:var(--gray-soft);margin-top:12px">Meta de CTR do briefing para eventos: acima de 1,8%. Verde marca as campanhas que bateram a meta, amarelo as intermediárias e vermelho as que ficaram abaixo.</p></div>
+    </div>
+    <div class="section">
+      <div class="section-head"><span class="bar"></span><h2>Leitura estratégica</h2></div>
+      <div class="insight">
+        <div class="ibox win"><h3>Uma campanha carrega a aquisição</h3>
+          <p>A campanha de <b>visitas ao perfil</b> gerou 11.708 seguidores a R$ 0,95 cada, 91% de toda a aquisição. É o motor da conta. Manter sempre ligada e proteger o orçamento dela é a prioridade número um.</p></div>
+        <div class="ibox neutral"><h3>Eventos com CTR irregular</h3>
+          <p>As campanhas de evento variam de <b>0,10% a 1,87%</b> de CTR. As de tráfego para site puro ficaram abaixo da meta de 1,8%. Vale padronizar o formato dos posts de evento que converteram (Conecta Varejo) e cortar os de baixo CTR mais rápido.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-plano">
+    <div class="report-title">
+      <span class="tag">Plano de Ação</span>
+      <h1>O Que Fazer a Partir de Agora</h1>
+      <p>Foco único: <b>ganhar seguidor qualificado</b> (donos de supermercado, executivos do varejo, indústria alimentar). A ASSERJ já compra seguidor a R$ 1,09, abaixo da meta. O plano parte de uma constatação: a máquina de aquisição funciona, mas está subfinanciada. 65% da verba vai para autoridade. Corrigir essa proporção é o maior alavancador da conta.</p>
+    </div>
+    <div class="section" style="margin-top:8px">
+      <div class="section-head"><span class="bar"></span><h2>O tamanho da oportunidade</h2><span class="hint">mesmo investimento, foco no que converte</span></div>
+      <div class="proj">
+        <div class="now"><div class="lbl">Ritmo atual</div><div class="big">1174 seg/mês</div>
+          <div class="desc">Com 30% da verba em aquisição. O resto vai para autoridade e eventos, que quase não geram seguidor.</div></div>
+        <div class="fut"><div class="lbl">Realocando 40% da autoridade</div><div class="big">~2206 seg/mês</div>
+          <div class="desc">Movendo R$ 12.374 de autoridade para aquisição, ao CPS já comprovado de R$ 1,09. Sem gastar mais.</div></div>
+      </div>
+      <p style="font-size:11px;color:var(--gray-soft);margin-top:12px">Projeção pelo CPS real da aquisição (R$ 1,09). A meta do briefing é 300 a 800 seguidores/mês: a conta já entrega 1174 e o cenário proposto a leva bem acima do teto da meta.</p>
+    </div>
+    <div class="section">
+      <div class="section-head"><span class="bar"></span><h2>Os 6 passos, em ordem de prioridade</h2></div>
+      <div class="card">
+        <div class="step"><div class="num">1</div><div class="body">
+          <h3>Proteger e escalar a campanha de visitas ao perfil</h3>
+          <p>Ela sozinha gerou 11.708 seguidores a R$ 0,95, é o motor da conta. Antes de qualquer coisa, garantir orçamento contínuo de R$ 35 a 50/dia (Campanha 1 do briefing) e nunca deixar faltar verba. Testar aumento gradual de budget observando se o CPS se mantém abaixo de R$ 2,00.</p>
+          <div class="meta-tags"><span class="mtag">Impacto: máquina de seguidor</span><span class="mtag cost">R$ 35 a 50/dia contínuo</span><span class="mtag kpi">KPI: CPS abaixo de R$ 2,00</span></div>
+        </div></div>
+        <div class="step"><div class="num">2</div><div class="body">
+          <h3>Realocar verba de autoridade para aquisição</h3>
+          <p>65% do investimento (R$ 30.934) foi para alcance e engajamento, gerando 105 seguidores. Reduzir esse bloco em 40% e mover para a aquisição, que roda a R$ 1,09, é a decisão de maior retorno. A autoridade continua existindo, mas com peso proporcional ao seu papel.</p>
+          <div class="meta-tags"><span class="mtag">Impacto: mais seguidor sem gastar mais</span><span class="mtag cost">Move R$ 12.374</span><span class="mtag kpi">KPI: aquisição acima de 50% da verba</span></div>
+        </div></div>
+        <div class="step"><div class="num">3</div><div class="body">
+          <h3>Impulsionar só posts com performance orgânica comprovada</h3>
+          <p>Seguindo a diretriz do briefing: investir apenas em post com taxa orgânica acima de 2%. Os posts que já geraram seguidor barato (conteúdo de bastidores e opinião setorial) são o padrão a replicar. Budget de R$ 20 a 50 por post, 5 a 7 dias.</p>
+          <div class="meta-tags"><span class="mtag">CPS alvo: R$ 1,50 a 4,00</span><span class="mtag cost">R$ 20 a 50/post</span><span class="mtag kpi">KPI: só post com orgânico acima de 2%</span></div>
+        </div></div>
+        <div class="step amber"><div class="num">4</div><div class="body">
+          <h3>Cortar autoridade de baixo retorno</h3>
+          <p>A campanha de BIG ALCANCE consumiu R$ 10.654 para 23 seguidores. Aplicar a regra do briefing: pausar impulsionamento com CPS acima de R$ 5,00 por mais de 3 dias. Manter só a autoridade que serve ao posicionamento, com público segmentado (executivos de varejo), não alcance aberto.</p>
+          <div class="meta-tags"><span class="mtag cost">Teto: CPS R$ 5,00 / 3 dias</span><span class="mtag kpi">KPI: zero alcance aberto sem retorno</span></div>
+        </div></div>
+        <div class="step blue"><div class="num">5</div><div class="body">
+          <h3>Padronizar as campanhas de evento</h3>
+          <p>Os eventos (SRE, Conecta Varejo, Super Negócios) tiveram CTR de 0,10% a 1,87%. As campanhas de tráfego para site ficaram abaixo da meta de 1,8%. Padronizar o formato Stories com data, palestrantes e CTA de urgência, acelerando budget (R$ 100 a 200) nos 7 dias antes de cada evento, como manda o briefing.</p>
+          <div class="meta-tags"><span class="mtag">Meta: CTR acima de 1,8%</span><span class="mtag cost">R$ 100 a 200 pré-evento</span><span class="mtag kpi">KPI: conversão 3 a 8% do alcance</span></div>
+        </div></div>
+        <div class="step slate"><div class="num">6</div><div class="body">
+          <h3>Manter o seguidor qualificado, não o volume</h3>
+          <p>Regra de ouro do briefing: 100 supermercadistas do RJ valem mais que 1.000 consumidores. Ao escalar a aquisição, manter a segmentação por cargo (proprietário, diretor, gerente) e interesse em varejo e gestão. Monitorar a qualidade do seguidor, não só o número, para não despersonalizar a base.</p>
+          <div class="meta-tags"><span class="mtag kpi">Foco: público B2B varejo</span><span class="mtag kpi">Segmentação por cargo</span></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-head"><span class="bar"></span><h2>Para fazer já na primeira semana</h2></div>
+      <div class="card">
+        <ul class="checklist">
+          <li>Confirmar que a campanha de <b>visitas ao perfil</b> está com orçamento contínuo e sem interrupção.</li>
+          <li>Reduzir o budget das campanhas de <b>BIG ALCANCE e reconhecimento</b> em 40% e remanejar para aquisição.</li>
+          <li>Ativar a <b>regra de corte</b> (CPS acima de R$ 5,00 por 3 dias) como rotina de checagem semanal.</li>
+          <li>Levantar os <b>posts de maior engajamento orgânico</b> dos últimos 60 dias para impulsionar.</li>
+          <li>Preparar o <b>template de Stories de evento</b> (data, palestrantes, CTA de urgência) para o próximo evento do calendário.</li>
+          <li>Definir a <b>meta do mês</b>: manter acima de 1.500 seguidores qualificados com CPS abaixo de R$ 2,00.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-head"><span class="bar"></span><h2>Em uma frase</h2></div>
+      <div class="insight">
+        <div class="ibox win"><h3>A tese do plano</h3>
+          <p>A ASSERJ já tem a melhor máquina de aquisição possível, seguidor qualificado a R$ 1,09. O crescimento não depende de descobrir nada novo, e sim de <b>tirar verba da autoridade cara e colocar onde já converte</b>, mantendo a qualidade do público B2B. Foco em seguidor certo, do primeiro ao último real.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="lg"><span class="k">Keep</span>ads</div>
+    <small>Relatório gerado para apresentação ao cliente · dados Meta Ads · jun/2026</small>
+  </footer>
+</div>
+<script>
+const labels=["Ago/25", "Set/25", "Out/25", "Nov/25", "Dez/25", "Jan/26", "Fev/26", "Mar/26", "Abr/26", "Mai/26", "Jun/26"];
+const aqVal=[1567, 1030, 543, 614, 991, 1445, 1241, 1602, 2023, 1503, 1503], auVal=[2515, 2715, 2239, 2906, 2943, 2557, 2317, 3104, 2721, 3791, 3125], evVal=[1742, 0, 539, 23, 0, 0, 0, 0, 0, 0, 0];
+const cpsAq=[2.14, 3.34, 1.63, 1.53, 0.61, 0.85, 0.81, 0.75, 1.33, 1.02, 1.31];
+const visitas=[6986, 3587, 3480, 3501, 5113, 6596, 6364, 7690, 9775, 5161, 4583], txVisSeg=[11.4, 8.8, 9.8, 11.9, 32.4, 25.7, 24.1, 27.9, 15.6, 29.0, 25.1];
+Chart.defaults.font.family="'Inter','Segoe UI',sans-serif";
+Chart.defaults.font.size=12; Chart.defaults.color='#6B6B6B';
+let m1=false,m2=false;
+function makeCh1(){
+  if(m1)return; m1=true;
+  new Chart(document.getElementById('ch1'),{
+    data:{labels,datasets:[
+      {type:'bar',label:'Aquisição',data:aqVal,backgroundColor:'#00CA9E',stack:'v',yAxisID:'y',order:3,maxBarThickness:44},
+      {type:'bar',label:'Autoridade',data:auVal,backgroundColor:'#5B6472',stack:'v',yAxisID:'y',order:3,maxBarThickness:44},
+      {type:'bar',label:'Eventos',data:evVal,backgroundColor:'#3B7DD8',stack:'v',yAxisID:'y',order:3,borderRadius:6,maxBarThickness:44},
+      {type:'line',label:'CPS aquisição',data:cpsAq,borderColor:'#0D0D0D',backgroundColor:'#0D0D0D',borderWidth:2.5,pointRadius:4,tension:.35,yAxisID:'y1',order:1}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#0D0D0D',padding:12,cornerRadius:8,titleFont:{weight:'700'},
+        callbacks:{label:c=>c.dataset.label==='CPS aquisição'?'CPS: R$ '+c.parsed.y.toFixed(2):c.dataset.label+': R$ '+c.parsed.y.toLocaleString('pt-BR')}}},
+      scales:{x:{stacked:true,grid:{display:false},ticks:{autoSkip:false,maxRotation:45,font:{weight:'600'}}},
+        y:{stacked:true,position:'left',beginAtZero:true,grid:{color:'#F2F2F2'},title:{display:true,text:'Verba (R$)',font:{weight:'700',size:11}},ticks:{callback:v=>'R$'+(v/1000)+'k'}},
+        y1:{position:'right',beginAtZero:true,grid:{drawOnChartArea:false},title:{display:true,text:'CPS (R$)',font:{weight:'700',size:11}},ticks:{callback:v=>'R$'+v}}}}
+  });
+}
+function makeCh2(){
+  if(m2)return; m2=true;
+  new Chart(document.getElementById('ch2'),{
+    data:{labels,datasets:[
+      {type:'bar',label:'Visitas',data:visitas,backgroundColor:'#5B6472',borderRadius:6,yAxisID:'y',order:2,maxBarThickness:44},
+      {type:'line',label:'Vis→Seg',data:txVisSeg,borderColor:'#00CA9E',backgroundColor:'#00CA9E',borderWidth:3,pointRadius:4,tension:.35,yAxisID:'y1',order:1}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#0D0D0D',padding:12,cornerRadius:8,
+        callbacks:{label:c=>c.dataset.label==='Vis→Seg'?'Conversão: '+c.parsed.y.toFixed(1)+'%':'Visitas: '+c.parsed.y.toLocaleString('pt-BR')}}},
+      scales:{x:{grid:{display:false},ticks:{autoSkip:false,maxRotation:45,font:{weight:'600'}}},
+        y:{position:'left',beginAtZero:true,grid:{color:'#F2F2F2'},title:{display:true,text:'Visitas',font:{weight:'700',size:11}}},
+        y1:{position:'right',beginAtZero:true,grid:{drawOnChartArea:false},title:{display:true,text:'Conversão (%)',font:{weight:'700',size:11}},ticks:{callback:v=>v+'%'}}}}
+  });
+}
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    const id=t.dataset.tab;
+    document.getElementById('panel-'+id).classList.add('active');
+    if(id==='funil') setTimeout(makeCh2,30);
+  });
+});
+makeCh1();
+</script>
+</body>
+</html>
